@@ -32,26 +32,28 @@ def get_pdf_from_csv( my_file_csv ):
     """
     pdf = pd.read_csv(my_file_csv)
     
+    # print ("Raw data classes:", pdf.groupby('Class_name').count())
+    
     perf_pix= pdf[pdf['Mean_PQMas'] == 16383.0]  # where(Mean_PQMas=16383)
     
-    # change non 'W_*' into NoWater
-    perf_pix.ix[perf_pix.Class_name.str.match('^W_*')==False, 'Class_name'] = 'NoWater'
+    # Add a new column Class2:  assign those rows with non 'W_*' into NoWater
+    perf_pix.ix[perf_pix.Class_name.str.match('^W_*')==False, 'Class2'] = 'NoWater'
 
-    # change W_* into Water; all other classes into NotWater. Binary classes
-    perf_pix.ix[perf_pix.Class_name.str.match('^W_*'), 'Class_name'] = 'Water'
+    # Assign W_* into Water; all other classes into NotWater. Binary classes
+    perf_pix.ix[perf_pix.Class_name.str.match('^W_*'), 'Class2'] = 'Water'
     
     # do some stats to inspect the samples
     # Group by Pixel Class_name, then count the number of rows in each group
-    print ("perfect pixels classes:", perf_pix.groupby('Class_name').count())
     
-    print ("Raw data classes:", pdf.groupby('Class_name').count())
+    # print ("perfect pixels classes:", perf_pix.groupby('Class2').count())
+    
     
     return perf_pix
     
     
 def get_sample_target(pdf):
     """
-    Prepare sample-target from a pandas dataframe pdf
+    Prepare sample-pixels and target-classes from a pandas dataframe pdf
     """
     #get the column names as list    
     clm_list = []
@@ -113,9 +115,19 @@ def main(csvfile):
     mod = get_model_by_train(X,Y)
     check_model(mod, X, Y)
 
-
+########################################################################################
+# python apply_detree.py /g/data/u46/fxz547/wofs_training_sample_data/orig_copy/Test_Tile_samples_20140203.csv
+#----------------------------
 if __name__== '__main__':
-    
-    csvfile=sys.argv[1]
+    """ main entry point
+    """
+    if (len(sys.argv)<2):
+        print ("Usage example:    ")
+        print("python apply_detree.py /g/data/u46/fxz547/wofs_training_sample_data/orig_copy/Test_Tile_samples_20140203.csv")
+        
+        sys.exit(1)
+    else:
+        csvfile=sys.argv[1]
+        pass
     
     main(csvfile)
