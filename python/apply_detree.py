@@ -37,10 +37,10 @@ def get_pdf_from_csv( my_file_csv ):
     perf_pix= pdf[pdf['Mean_PQMas'] == 16383.0]  # where(Mean_PQMas=16383)
     
     # Add a new column Class2:  assign those rows with non 'W_*' into NoWater
-    perf_pix.ix[perf_pix.Class_name.str.match('^W_*')==False, 'Class2'] = 'NoWater'
+#     perf_pix.ix[perf_pix.Class_name.str.match('^W_*')==False, 'Class2'] = 'NoWater'
 
-    # Assign W_* into Water; all other classes into NotWater. Binary classes
-    perf_pix.ix[perf_pix.Class_name.str.match('^W_*'), 'Class2'] = 'Water'
+#     # Assign W_* into Water; all other classes into NotWater. Binary classes
+#     perf_pix.ix[perf_pix.Class_name.str.match('^W_*'), 'Class2'] = 'Water'
     
     # do some stats to inspect the samples
     # Group by Pixel Class_name, then count the number of rows in each group
