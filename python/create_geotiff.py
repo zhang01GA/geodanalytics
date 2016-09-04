@@ -1,4 +1,10 @@
-fzhang@fzhangtoshiba:/Softlab/works$ cat create_geotiff.py 
+"""
+# https://mapbox.github.io/rasterio/cookbook.html
+# https://github.com/mapbox/rasterio
+# https://pcjericks.github.io/py-gdalogr-cookbook/raster_layers.html
+#fzhang@fzhangtoshiba:/Softlab/works$ cat create_geotiff.py 
+"""
+
 import gdal, ogr, os, osr
 import numpy as np
 
