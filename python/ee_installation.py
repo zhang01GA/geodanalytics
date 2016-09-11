@@ -1,5 +1,3 @@
-fzhang@fzhangtoshiba:/Softlab/gEarthEngine$ cat test_installation.py
-#   See https://developers.google.com/api-client-library/python/
 """ For Linux ubuntu installation, follow the  guide: https://developers.google.com/earth-engine/python_install
 
      pin install  scikit-image
@@ -9,6 +7,8 @@ fzhang@fzhangtoshiba:/Softlab/gEarthEngine$ cat test_installation.py
      apt-get install libssl-dev
      sudo pip install 'pyOpenSSL>=0.11'
      sudo pip install earthengine-api
+
+#   See https://developers.google.com/api-client-library/python/
 """
 
 # Import the Earth Engine Python Package

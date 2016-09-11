@@ -2,7 +2,7 @@
 # https://mapbox.github.io/rasterio/cookbook.html
 # https://github.com/mapbox/rasterio
 # https://pcjericks.github.io/py-gdalogr-cookbook/raster_layers.html
-#fzhang@fzhangtoshiba:/Softlab/works$ cat create_geotiff.py 
+# /Softlab/works$ cat create_geotiff.py 
 """
 
 import gdal, ogr, os, osr
@@ -37,7 +37,7 @@ if __name__ == "__main__":
     rasterOrigin = (149.298, -34.974)
     pixelWidth = 0.01
     pixelHeight = 0.01
-    newRasterfn = 'test.tif'
+    newRasterfn = 'GDAL_image.tif'
     array = np.array([[ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
                       [ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
                       [ 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 1, 1],
@@ -50,4 +50,9 @@ if __name__ == "__main__":
                       [ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]])
 
 
-    main(newRasterfn,rasterOrigin,pixelWidth,pixelHeight,array)
+    random= np.random.rand(array.shape[0],array.shape[1])
+
+    array2= 100*array + 60*random
+    print (array2)
+
+    main(newRasterfn,rasterOrigin,pixelWidth,pixelHeight,array2)
