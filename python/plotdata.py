@@ -3,6 +3,9 @@ from matplotlib import pyplot as plt
 import numpy as np
 import Image, ImageDraw
 
+from PIL import ImageFont
+
+
 def simple_fig():
     #Plotting to our canvas
     plt.plot([1,2,3],[4,5,1])
@@ -35,21 +38,27 @@ def add_text_onto_image(imgfile):
     create a new image file 
     """
 
-    img = Image.new('RGB', (200, 100))
+    img = Image.open(imgfile)
+    
     d = ImageDraw.Draw(img)
-    d.text((20, 20), 'Hello', fill=(255, 255, 255))
+    
+    myfont = ImageFont.truetype("sans-serif.ttf", 20)
+    d.text((100, 50), 'Hello %s'%imgfile, fill=(255, 0, 0), font=myfont)
     
     newfn='new_'+imgfile
 
     img.save(newfn)
+    img.show()
     
 #############################################################    
 if __name__ == "__main__":
     
     add_text_onto_image("hello.png")
 
-    text_on_image()
-
-    display_rgb_image()
-
-    simple_fig()
+#==============================================================================
+#     text_on_image()
+# 
+#     display_rgb_image()
+# 
+#     simple_fig()
+#==============================================================================
