@@ -1,6 +1,7 @@
 #Importing pyplot
 from matplotlib import pyplot as plt
 import numpy as np
+import Image, ImageDraw
 
 def simple_fig():
     #Plotting to our canvas
@@ -22,15 +23,30 @@ def display_rgb_image():
 
 def text_on_image():
 
-    import Image, ImageDraw
-
     img = Image.new('RGB', (200, 100))
     d = ImageDraw.Draw(img)
     d.text((20, 20), 'Hello', fill=(255, 255, 255))
 
     img.save("textimg_hello.png")
 
+def add_text_onto_image(imgfile):
+    """
+    Added text to an existing image file; 
+    create a new image file 
+    """
+
+    img = Image.new('RGB', (200, 100))
+    d = ImageDraw.Draw(img)
+    d.text((20, 20), 'Hello', fill=(255, 255, 255))
+    
+    newfn='new_'+imgfile
+
+    img.save(newfn)
+    
+#############################################################    
 if __name__ == "__main__":
+    
+    add_text_onto_image("hello.png")
 
     text_on_image()
 
