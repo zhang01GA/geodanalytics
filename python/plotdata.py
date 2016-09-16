@@ -41,9 +41,9 @@ def add_text_onto_image(imgfile):
     img = Image.open(imgfile)
     
     d = ImageDraw.Draw(img)
-    
-    myfont = ImageFont.truetype("sans-serif.ttf", 20)
-    d.text((100, 50), 'Hello %s'%imgfile, fill=(255, 0, 0), font=myfont)
+    fsize=20
+    myfont = ImageFont.truetype("/usr/share/fonts/dejavu/DejaVuSans-Bold.ttf", fsize)
+    d.text((0, 80), 'Hello %s'%imgfile, fill=(255, 0, 0), font=myfont)
     
     newfn='new_'+imgfile
 
