@@ -1,6 +1,7 @@
 """
 
-Identify, Retrieve and  Export  Near-Cloud-Free Landsat Images over any AOI within a certain size-limit
+Identify, Retrieve and  Export  Near-Cloud-Free Satellite Images over an area-of-interest
+size-limit applies
 
 Fei Zhang @Geoscience Australia
 
