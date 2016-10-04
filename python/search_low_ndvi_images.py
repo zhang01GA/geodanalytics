@@ -40,9 +40,22 @@ sys.path.insert(0, '/g/data/u46/fxz547/Githubz/agdc-v2')  # '/home/547/fxz547/my
 import datacube
 from datacube.storage import masking
 
+import shutil
+from datetime import datetime
+import yaml
+import logging
+logging.basicConfig()
+_logger = logging.getLogger(__file__)  # (__name__) ()is root
+_logger.setLevel(logging.INFO)
+_logger.setLevel(logging.DEBUG)
+
 
 class NDVI_Image_Stack:
     def __init__(self, confile=None):
+
+        # Create an API data access
+
+        self.dc = datacube.Datacube(app='GetData')
 
         if confile is None:
             # default values:
@@ -73,13 +86,10 @@ class NDVI_Image_Stack:
             #self.pq_prod_type = self.prod_type.replace('nbar', 'pq')
 
         else:
-            self.parse_config()
+            self.qdict=self.init_from_config(confile)
 
-        # Create an API data access
 
-        self.dc = datacube.Datacube(app='GetData')
-
-    def parse_config(self, conf_file):
+    def init_from_config(self, configfile):
         """
         Initialize the object self attributes from a config file
         :param conf_file: path2afile
@@ -87,7 +97,31 @@ class NDVI_Image_Stack:
         """
         print("parsing configuration file  to get input parameters for this run")
 
-        return "AOI"
+        with open(configfile, 'r') as f:
+            config = yaml.safe_load(f)
+
+        prod_type=config.get('prod_type')
+        
+        self.AOI_NAME = config.get('aoi_name')
+        
+        # determine spatial coverage
+        self.yp = (
+        float(config.get('lat_min_deg')), float(config.get('lat_max_deg')))
+
+        self.xp = (
+        float(config.get('lon_min_deg')), float(config.get( 'lon_max_deg')))
+
+        # determine time period
+
+        self.tp = (config.get('start_datetime'), config.get('end_datetime'))
+        # dateutil.parser.parse(self.config.get('coverage','start_datetime')), \
+        # dateutil.parser.parse(self.config.get('coverage','end_datetime'))  )
+        
+        self.qdict = {"longitude": self.xp, "latitude": self.yp, "time": self.tp,'prod_type':prod_type}
+
+        _logger.debug(self.qdict)
+        
+        return self.qdict
 
     def get_valid_data(self, prod_type):
         
@@ -300,7 +334,7 @@ class NDVI_Image_Stack:
         prod='ls8_nbar_albers'
         pdframe= self.pipeline(prod)
 
-        pdframe.plot(figsize=(20, 10), marker='o')
+        #pdframe.plot(figsize=(20, 10), marker='o')
 
         outcsvfile='%s_%s_NDVI.csv'%(self.AOI_NAME,prod)
         pdframe.to_csv(outcsvfile) #("Woodland_LS5_NDVI.csv")
@@ -540,6 +574,6 @@ def old_filtered_ndvi_mean(ndvi_imgs, ndisk=5):
 #---------------------------------------------------------------------
 if __name__ == "__main__":
     
-    ndviobj = NDVI_Image_Stack()
+    ndviobj = NDVI_Image_Stack(sys.argv[1])
 
     ndviobj.main()

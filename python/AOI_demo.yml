@@ -1,0 +1,26 @@
+# http://pyyaml.org/wiki/PyYAMLDocumentation
+
+# user may optionally assign a ID for this run. Leave blank if not sure.
+#run_id: fzhang_2016-05-08T13-48-12
+
+base_dir:  /home/547/fxz547/myGithub/geodanalytics/workdir 
+prod_type:   'ls8_nbar_albers'
+
+# AOI (Canberra region)
+aoi_name:   'Woodland'
+
+# self.xp = (147.35, 147.45); self.yp = (-22.92, -22.82)
+# Spatial and Temporal Coverage:
+lat_min_deg: -22.92
+lat_max_deg: -22.82
+lon_min_deg: 147.35
+lon_max_deg: 147.45
+
+
+start_datetime: '2010-01-01'
+end_datetime:   '2016-12-31' 
+
+# without the str quote 2016-12-31 will result a datetime object in yaml load
+#satellites: LS5,LS7,LS8
+#testDateTimeParser:  2016-01-01T00:00:00Z
+#testDateTimeParser2: !!str "2016-03-31T23:59:59Z"
