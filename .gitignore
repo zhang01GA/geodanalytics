@@ -69,6 +69,10 @@ log/*
 # images
 *.tif
 *.tiff
+*.png
+*.jpg
+*.mp4
+*.
 
 # netcdf files
 *.nc
@@ -87,6 +91,7 @@ log/*
 *.tar
 *.tar.gz
 *.zip
+*.pickle
 
 # private, local files
 local*
