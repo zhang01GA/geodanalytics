@@ -1,0 +1,26 @@
+# http://pyyaml.org/wiki/PyYAMLDocumentation
+
+# user may optionally assign a ID for this run. Leave blank if not sure.
+#run_id: fzhang_2016-05-08T13-48-12
+
+base_dir:  /home/547/fxz547/myGithub/geodanalytics/workdir 
+prod_type:   'ls8_nbar_albers'
+
+# AOI area of interest 
+aoi_name:   'FireScarNT'
+
+#self.AOI_NAME='FireScarNT'; self.xp=(132.50, 132.60); self.yp=(-19.65, -19.55)
+# Spatial and Temporal Coverage:
+lat_min_deg: -19.65
+lat_max_deg: -19.55
+lon_min_deg: 132.50
+lon_max_deg: 132.60
+
+
+start_datetime: '1980-01-01'
+end_datetime:   '2015-12-31' 
+
+# without the str quote 2016-12-31 will result a datetime object in yaml load
+#satellites: LS5,LS7,LS8
+#testDateTimeParser:  2016-01-01T00:00:00Z
+#testDateTimeParser2: !!str "2016-03-31T23:59:59Z"
