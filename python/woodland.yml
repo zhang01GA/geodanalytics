@@ -17,8 +17,8 @@ lon_min_deg: 147.35
 lon_max_deg: 147.45
 
 
-start_datetime: '2010-01-01'
-end_datetime:   '2016-12-31' 
+start_datetime: '1980-01-01'
+end_datetime:   '2015-12-31'
 
 # without the str quote 2016-12-31 will result a datetime object in yaml load
 #satellites: LS5,LS7,LS8

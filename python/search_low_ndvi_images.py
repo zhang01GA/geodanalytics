@@ -22,7 +22,8 @@ Below are the centre point locations for 3 study areas with different vegetation
 
 3. Woodland (remain greenish most of the time - the understory should change in response to seasonal drying out)22:52:35.4S/147:24:11.25E
 
-extract a 5X5 km or 10X10km tile for each area. Then select only tiles with < 10% poor quality pixels (e.g. noise , cloud etc.). From that subset we run NDVI and then run a median kernel (3*3 ?) to smooth out noisy pixels. The kernel needs to accommodate crappy pixels as no data values. After that we calculate the average NDVI response for whole the tile. We should try a keep the tiles in chronological order because when we process all the tiles through time series and plot up the average NDVI value for each tile we will want to see trends of drying out (increased bareness) due to seasonal effects or recovery from fire scars. I suggest we look at the image tiles along each step of the work flow. There are lots of parameters (size of tile, size and shape of the kernel etc) we can change  - but as a first step this might be a good start.
+extract a 5X5 km or 10X10km tile for each area. Then select only tiles with < 10% poor quality pixels (e.g. noise , cloud etc.).
+From that subset we run NDVI and then run a median kernel (3*3 ?) to smooth out noisy pixels. The kernel needs to accommodate crappy pixels as no data values. After that we calculate the average NDVI response for whole the tile. We should try a keep the tiles in chronological order because when we process all the tiles through time series and plot up the average NDVI value for each tile we will want to see trends of drying out (increased bareness) due to seasonal effects or recovery from fire scars. I suggest we look at the image tiles along each step of the work flow. There are lots of parameters (size of tile, size and shape of the kernel etc) we can change  - but as a first step this might be a good start.
 
 """
 
@@ -44,6 +45,7 @@ import shutil
 from datetime import datetime
 import yaml
 import logging
+
 logging.basicConfig()
 _logger = logging.getLogger(__file__)  # (__name__) ()is root
 _logger.setLevel(logging.INFO)
@@ -74,20 +76,25 @@ class NDVI_Image_Stack:
             # self.AOI_NAME='FireScarNT'; self.xp=(132.50, 132.60); self.yp=(-19.65, -19.55)
 
             # Farming land (crops (green and fallow paddocks - Western NSW)30:5:45.33S/148:11:29.75E
-            #self.AOI_NAME='Farmland'; self.xp=(148.14, 148.24); self.yp=(-30.15, -30.05) # North of Dubbo, inside NSW border
+            # self.AOI_NAME='Farmland'; self.xp=(148.14, 148.24); self.yp=(-30.15, -30.05) # North of Dubbo, inside NSW border
 
             # Woodland (greenish most of the time. the understory should change in response to seasonal drying out)22:52:35.4S/147:24:11.25E
-            self.AOI_NAME = 'Woodland'; self.xp = (147.35, 147.45); self.yp = (-22.92, -22.82)  # west of Rockhampton
+            self.AOI_NAME = 'Woodland';
+            self.xp = (147.35, 147.45);
+            self.yp = (-22.92, -22.82)  # west of Rockhampton
             # woodland has a blank image in 2016-05? with NDVI=0. how to exclude it?
 
 
-            # self.prod_type = 'ls8_nbar_albers'
+            self.prod_type = 'ls8_nbar_albers'
 
-            #self.pq_prod_type = self.prod_type.replace('nbar', 'pq')
+            # self.pq_prod_type = self.prod_type.replace('nbar', 'pq')
+
+            self.qdict ={'AOI_NAME':self.AOI_NAME, "lon": self.xp, "lat": self.yp, "time": self.tp, 'prod_type': self.prod_type}
+
+            _logger.debug(self.qdict)
 
         else:
-            self.qdict=self.init_from_config(confile)
-
+            self.qdict = self.init_from_config(confile)
 
     def init_from_config(self, configfile):
         """
@@ -95,48 +102,68 @@ class NDVI_Image_Stack:
         :param conf_file: path2afile
         :return:
         """
-        print("parsing configuration file  to get input parameters for this run")
+        _logger.debug("parsing configuration file %s to get input parameters"% configfile)
 
         with open(configfile, 'r') as f:
             config = yaml.safe_load(f)
 
-        prod_type=config.get('prod_type')
-        
+        self.prod_type = config.get('prod_type')
+
         self.AOI_NAME = config.get('aoi_name')
-        
+
         # determine spatial coverage
         self.yp = (
-        float(config.get('lat_min_deg')), float(config.get('lat_max_deg')))
+            float(config.get('lat_min_deg')), float(config.get('lat_max_deg')))
 
         self.xp = (
-        float(config.get('lon_min_deg')), float(config.get( 'lon_max_deg')))
+            float(config.get('lon_min_deg')), float(config.get('lon_max_deg')))
 
         # determine time period
 
         self.tp = (config.get('start_datetime'), config.get('end_datetime'))
         # dateutil.parser.parse(self.config.get('coverage','start_datetime')), \
         # dateutil.parser.parse(self.config.get('coverage','end_datetime'))  )
-        
-        self.qdict = {"longitude": self.xp, "latitude": self.yp, "time": self.tp,'prod_type':prod_type}
+
+        self.qdict = {'AOI_NAME':self.AOI_NAME, "lon": self.xp, "lat": self.yp, "time": self.tp, 'prod_type': self.prod_type}
 
         _logger.debug(self.qdict)
-        
+
         return self.qdict
 
+    def update_from_dict(self, new_qdict):
+        """
+        update the original query dict by a new_qdict
+        :param new_qdict:
+        :return:
+        """
+        self.qdict.update(new_qdict)
+
+        self.AOI_NAME = self.qdict.get('AOI_NAME')
+        self.xp = self.qdict.get('lon')
+        self.yp = self.qdict.get('lat')
+        self.tp = self.qdict.get('time')
+
+        self.prod_type= self.qdict.get('prod_type')
+
+        _logger.debug(self.qdict)
+
+        return self.qdict
+
+
+
     def get_valid_data(self, prod_type):
-        
+
         query = {
             'time': ('1990-01-01', '1991-01-01'),
             'lat': (-35.2, -35.4),
             'lon': (149.0, 149.2),
         }
 
-        mslist=['red', 'nir']  #,'green', 'blue']
-        data = dc.load(product=prod_type, measurements=mslist, group_by='solar_day', **query )
-        data =  masking.mask_valid_data(data)
-        
-        return data
+        mslist = ['red', 'nir']  # ,'green', 'blue']
+        data = dc.load(product=prod_type, measurements=mslist, group_by='solar_day', **query)
+        data = masking.mask_valid_data(data)
 
+        return data
 
     def get_ndvi(self, prod_type, cloudfreeRatio=0.5):
         """
@@ -156,7 +183,7 @@ class NDVI_Image_Stack:
         #     red= masking.mask_valid_data(bands.red)
         #     nir= masking.mask_valid_data(bands.nir)
 
-        
+
         bands = masking.mask_valid_data(bands)
         red = bands.red
         nir = bands.nir
@@ -217,31 +244,32 @@ class NDVI_Image_Stack:
 
         df = pdser.to_frame(name='NDVI')  # convert to dataframe
 
-        #df['PROD_TYPE'] = self.prod_type  # add a new column
+        # df['PROD_TYPE'] = self.prod_type  # add a new column
 
         return df.sort_index()
 
     @staticmethod
     def filter_center(A, size=3, no_data_val=None, func=np.nanmean):
         """
-        Parameters
-        ----------
-        A = input data
-        size = odd number uniform filtering kernel size
-        no_data_val = value in matrix that is treated as no data value
-        func: function to use, choose from np.nanmean/median/max/min etc.
-        Returns: nanmean of the matrix A filtered by a uniform kernel of size=size
-        -------
-        Adapted from: http://stackoverflow.com/questions/23829097/python-numpy-fastest-method-for-2d-kernel-rank-filtering-on-masked-arrays-and-o?rq=1
-        Notes
-        -----
+        nanmean of the matrix A filtered by a uniform kernel of size=size
         This function `centers` the kernel at the target pixel.
         This is slightly different from scipy.ndimage.uniform_filter application.
         In scipy.ndimage.uniform_filter, a convolution approach is implemented.
         An equivalent is scipy.ndimage.uniform_filter like convolution approach with
         no_data_val/nan handling can be found in filter_broadcast_uniform_filter in
         this module.
-        Change function to nanmedian, nanmax, nanmin as required.
+        ----------
+        A = input dataarray
+        size = odd number uniform filtering kernel size
+        no_data_val = value in matrix that is treated as no data value
+        func: function to use, choose from np.nanmean nanmedian, nanmax, nanmin as required.
+        Returns: a filtered image matrix of the same shape as input A
+
+        ----------
+        Ref:
+        https://github.com/NICTA/uncover-ml/blob/develop/preprocessing/raster_average.py
+        http://stackoverflow.com/questions/23829097/python-numpy-fastest-method-for-2d-kernel-rank-filtering-on-masked-arrays-and-o?rq=1
+        Notes
         """
 
         from numpy.lib.stride_tricks import as_strided
@@ -271,76 +299,97 @@ class NDVI_Image_Stack:
 
     def pipeline(self, prod):
         """
-        For the given prod_type, compute average NDVI time series, both original DNVI and spatially-filtered
+        For the given prod_type, compute average NDVI time series, both original NDVI and spatially-filtered
         return a merged pandas df
         """
-        
+
         if prod is None:
-            prod=self.prod_type
-            print("using self prod_type", prod)
+            prodtype = self.prod_type
+            print("Using self prod_type", prodtype)
         else:
-            pass
+            prodtype=prod
 
-        # original NDVI stack timeseries (nir-red/nir+red)
+        # Compute the original NDVI stack timeseries (nir-red/nir+red)
 
-        ndvi_stack = self.get_ndvi(prod, cloudfreeRatio=0.5)
+        ndvi_stack = self.get_ndvi(prodtype, cloudfreeRatio=0.5)
 
         print (ndvi_stack.shape)
 
         # imshow a few of the ndvi images
         # ndvi_stack[:20].plot(col='time', col_wrap=5, add_colorbar=False)
-        
-        spdf= self.get_ndvi_mean(ndvi_stack) # original ndvi mean time-series
 
-        pdf5 = filtered_ndvi_nanmean(ndvi_stack, ndisk=5)
-        spdf5 = pdf5.sort_index()
-        
-        pdf10 = filtered_ndvi_nanmean(ndvi_stack, ndisk=11)
-        spdf11 = pdf10.sort_index()
-        #pdf10.plot(figsize=(20, 10), marker='*')
+        spdf = self.get_ndvi_mean(ndvi_stack)  # original ndvi nanmean time-series, sorted
 
-        #fsize = 21
-        pdf21 = filtered_ndvi_nanmean(ndvi_stack, ndisk=21)
-        spdf21 = pdf21.sort_index()
+        # loop over filters on NDVIs
+        max_filtersize = 5  #filter sizes= [3, 5, ...2*maxfs +1]
+        new_cols = ['NDVI0']
 
+        for fs in xrange(1, max_filtersize+1):
+            fsize=2*fs+1
 
-        for irow in xrange(0, spdf.shape[0]):
-            dtime = spdf.index[irow]
-            print(dtime, spdf.iloc[irow][0], spdf5.iloc[irow].NDVI, spdf11.iloc[irow].NDVI, spdf21.iloc[irow].NDVI)
+            _logger.debug('Doing filter of size= %s'%str(fsize))
+
+            new_cols.append('NDVI%s'%(str(fsize)))
+            new_spdf= filtered_ndvi_stats(ndvi_stack, ndisk=fsize)
+            spdf = pd.merge(spdf, new_spdf, left_index=True, right_index=True, how='outer')
 
 
-        ndvidf5 = pd.merge(spdf, spdf5, left_index=True, right_index=True, how='outer')
+        spdf.columns = new_cols
 
-        ndvidf11 = pd.merge(ndvidf5, spdf11, left_index=True, right_index=True, how='outer')
+        spdf['PROD_TYPE'] = prodtype  # add a new column
 
-        ndvidf21 = pd.merge(ndvidf11, spdf21, left_index=True, right_index=True, how='outer')
+        return spdf
 
-        ndvidf21.head()
+        # pdf5 = filtered_ndvi_stats(ndvi_stack, ndisk=5)
+        # spdf5 = pdf5.sort_index()
+        #
+        # pdf10 = filtered_ndvi_stats(ndvi_stack, ndisk=11)
+        # spdf11 = pdf10.sort_index()
+        # # pdf10.plot(figsize=(20, 10), marker='*')
+        #
+        # # fsize = 21
+        # pdf21 = filtered_ndvi_stats(ndvi_stack, ndisk=21)
+        # spdf21 = pdf21.sort_index()
+        #
+        # for irow in xrange(0, spdf.shape[0]):
+        #     dtime = spdf.index[irow]
+        #     print(dtime, spdf.iloc[irow][0], spdf5.iloc[irow].NDVI, spdf11.iloc[irow].NDVI, spdf21.iloc[irow].NDVI)
+        #
+        # ndvidf5 = pd.merge(spdf, spdf5, left_index=True, right_index=True, how='outer')
+        #
+        # ndvidf11 = pd.merge(ndvidf5, spdf11, left_index=True, right_index=True, how='outer')
+        #
+        # ndvidf21 = pd.merge(ndvidf11, spdf21, left_index=True, right_index=True, how='outer')
+        #
+        # ndvidf21.head()
+        #
+        # # Rename columns
+        # new_cols = ['NDVI0', 'NDVIS5', 'NDVIS11', 'NDVIS21']
+        # ndvidf21.columns = new_cols
+        #
+        # ndvidf21['PROD_TYPE'] = prod  # add a new column
+        #
+        # return ndvidf21
 
-        # Rename columns
-        new_cols = ['NDVI0', 'NDVIS5', 'NDVIS11', 'NDVIS21']
-        ndvidf21.columns = new_cols
-
-        ndvidf21['PROD_TYPE'] = prod  # add a new column
-
-        
-        return ndvidf21 
-
-    def main(self, confile=None):
+    def main(self, prod=None):
         """
         main function to test run the pipeline: get a merged pdfame of NDVI time series, plot and to_csv the data.
         :return:
         """
-        prod='ls8_nbar_albers'
-        pdframe= self.pipeline(prod)
+        if prod is None:
+            prod=self.prod_type
 
-        #pdframe.plot(figsize=(20, 10), marker='o')
+        pdframe = self.pipeline(prod)
 
-        outcsvfile='%s_%s_NDVI.csv'%(self.AOI_NAME,prod)
-        pdframe.to_csv(outcsvfile) #("Woodland_LS5_NDVI.csv")
+        # pdframe.plot(figsize=(20, 10), marker='o')
+
+
+        outcsvfile = '%s_%s_NDVI.csv' % (self.AOI_NAME, prod)
+        pdframe.to_csv(outcsvfile)  # ("Woodland_LS5_NDVI.csv")
 
         return pdframe
-       
+
+
 ######################################################################
 
 def test_filter(img1):
@@ -380,9 +429,9 @@ def multi_sensor_ndvi():
     # ndvi578=pandas.concat([df_ndvi_ls5, df_ndvi_ls7, df_ndvi_ls8])
 
     # if only Landsat-8
-    
+
     ndvi578 = df_ndvi_ls8
-    
+
     ndvi578.sort_values('NDVI').head(40)  # sort ndvi values
 
     ndvi578.shape
@@ -393,9 +442,7 @@ def multi_sensor_ndvi():
 
     ndvi578.to_csv(outcsvfile)  # ('/tmp/meanNDVI578_FireScarNT.csv')
 
-
     ndvi578.hist(bins=100)
-
 
     p10 = ndvi578.quantile(0.1)
     p90 = ndvi578.quantile(0.9)
@@ -403,14 +450,11 @@ def multi_sensor_ndvi():
     bot_tenperc = ndvi578[(ndvi578['NDVI'] <= p10[0])].dropna()
     top_tenperc = ndvi578[(ndvi578['NDVI'] >= p90[0])].dropna()
 
-
-
     outcsvfile2 = 'meanNDVI578_%s_bot10pc.csv' % (AOI_NAME)
     bot_tenperc.to_csv(outcsvfile2)
 
     outcsvfile3 = 'meanNDVI578_%s_top10pc.csv' % (AOI_NAME)
     top_tenperc.to_csv(outcsvfile3)
-
 
     top_tenperc.head
 
@@ -421,13 +465,12 @@ def multi_sensor_ndvi():
     return
 
 
-def filtered_ndvi_nanmean(ndvi_imgs, ndisk=5):
+def filtered_ndvi_stats(ndvi_imgs, ndisk=3, func=np.nanmedian):
     """
-    New spatial filter to the input ndvi_imgs array, which may have nan pixel values,
-    ndisk=5 is the default size of the  filter
+    New spatial filter to a stack of input ndvi_imgs, which may have nan-valued pixels,
+    ndisk=3 is the default size of the  filter
     return a pandas dataframe of mean NDVI for the images.
 
-    See http://scikit-image.org/docs/stable/api/skimage.filters.html?highlight=local%20median%20filter
     """
 
     mydict = {}
@@ -436,18 +479,17 @@ def filtered_ndvi_nanmean(ndvi_imgs, ndisk=5):
         img = ndvi_imgs.isel(time=it)
         acqdate = ndvi_imgs.time[it].values
 
-        meds = NDVI_Image_Stack.filter_center(img, size=ndisk, func=np.nanmedian)
-        # plt.imshow(meds)
-        mydict.update({acqdate: np.nanmean(meds)})
+        filtered_img = NDVI_Image_Stack.filter_center(img, size=ndisk, func=func)
+
+        # show this image?  plt.imshow(filtered_img)
+
+        mydict.update({acqdate: np.nanmean(filtered_img)})  # mean ndvi of the image
 
     # convert mydict to pandas dataframe, with proper column names and index
     pdf = pd.DataFrame(mydict.items(), columns=['Date', 'NDVI'])
     pdf.set_index('Date', inplace=True)
 
     return pdf.sort_index()
-
-
-import functools
 
 
 # notworking @deprecated
@@ -471,7 +513,6 @@ def old_filtered_ndvi_mean(ndvi_imgs, ndisk=5):
     from skimage.morphology import disk
     from skimage.filters.rank import median
 
-    
     mydict = {}
     for it in xrange(0, len(ndvi_imgs.time)):
         # apply median filter to get an image meds for this timeslice
@@ -571,9 +612,24 @@ def old_filtered_ndvi_mean(ndvi_imgs, ndisk=5):
 
 ######################################################################
 # provide a config file to initialise the class object NDVI_Image_Stack
-#---------------------------------------------------------------------
+# How2run:
+#   python search_low_ndvi_images.py woodland.yml [ ls5_nbar_albers | ls8_nbar_albers | ls7_nbar_albers]
+# ---------------------------------------------------------------------
 if __name__ == "__main__":
-    
-    ndviobj = NDVI_Image_Stack(sys.argv[1])
 
-    ndviobj.main()
+    prod=None
+    confile=None
+
+    if len(sys.argv) < 2:
+        print("Using default param ")
+    elif len(sys.argv) >= 2:
+        confile= sys.argv[1]
+
+    if(sys.argv) == 3:  # a product_type is specified for the AOI
+        prod = sys.argv[2]
+
+    # construct an initial object
+    ndviobj = NDVI_Image_Stack(confile)
+
+
+    ndviobj.main(prod)
