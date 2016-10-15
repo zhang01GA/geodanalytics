@@ -42,3 +42,22 @@ Now, start committing on your feature. When done, use:
 On branch feature/visualize_tiffs_ipynb
 nothing to commit, working directory clean
 
+edit docs/dev_history.txt
+commit and push
+
+Work on this feature brach in another site, 
+[fxz547@gsdev geodanalytics]$ git checkout feature/visualize_tiffs_ipynb
+Branch feature/visualize_tiffs_ipynb set up to track remote branch feature/visualize_tiffs_ipynb from origin.
+Switched to a new branch 'feature/visualize_tiffs_ipynb'
+
+[fxz547@gsdev geodanalytics]$ git pull  # always good to pull from origin to keep in sync
+
+[fxz547@gsdev geodanalytics]$ ls
+BareSoil  README.md  data  demo_PyConAU2016  docs  localz  notebooks  py3  python  util
+[fxz547@gsdev geodanalytics]$ git status
+# On branch feature/visualize_tiffs_ipynb
+nothing to commit (working directory clean)
+
+[fxz547@gsdev geodanalytics]$ vi docs/dev_history.txt 
+
+
