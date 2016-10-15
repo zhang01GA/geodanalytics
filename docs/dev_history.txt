@@ -1,0 +1,16 @@
+Initially only master branch
+
+use git flow to create a develop branch
+
+@ubuntu-qosmio:/Softlab/Githubz/geodanalytics$> git flow init -d
+
+
+@ubuntu-qosmio:/Softlab/Githubz/geodanalytics$ git push --set-upstream origin develop
+
+Username for 'https://github.com': zhang01GA
+Password for 'https://zhang01GA@github.com': 
+Total 0 (delta 0), reused 0 (delta 0)
+To https://github.com/zhang01GA/geodanalytics.git
+ * [new branch]      develop -> develop
+Branch develop set up to track remote branch develop from origin.
+
