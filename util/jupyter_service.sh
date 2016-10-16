@@ -20,15 +20,20 @@
 
 # log file
 LOG_FILE=tmpdir/jupyter_notebook.log
-
+PROC_NAME='jupyter-notebook'
 status(){ 
     echo Checking if jupyter-notebook is already running? 
-    jpid=`pgrep -u $USER -f jupyter-notebook`
-    echo $jpid
+    jpid=`pgrep -u $USER -f $PROC_NAME`
+    echo The $PROC_NAME pid is: $jpid
 
-    # if $jpid is an integer greater than 0, then return 1
-    # if $jpid is empty, not defined return 0
-    return $jpid  # this number will be cast into [0 256) eg: 8625 -> 177
+    if [ ${jpid}1 -gt 1 ]; then
+        echo "It ($jpid) is an integer, will return 1"
+        return 1
+        #return $jpid  # this number will be cast into [0 256) eg: 8625 -> 177
+    else
+        echo  It $jpid is empty or not defined, will return 0
+        return 0
+    fi
 }
 
 
@@ -57,6 +62,8 @@ stop() {
     echo 'Stopping jupyter now..'
     echo 'Running  kill -9 `pgrep jupyter` '
     kill -9 `pgrep jupyter` 
+
+    status
 }
 
 case "$1" in 
@@ -67,7 +74,7 @@ case "$1" in
        if [ $retval -eq 0 ]; then
            start
        else
-           echo already running
+           echo  $PROC_NAME is already running
            echo $retval
        fi
        ;;
@@ -87,7 +94,7 @@ case "$1" in
        if [ $retval -eq 0 ]; then
           echo "Not running " 
        else
-           echo already running
+           echo  $PROC_NAME is already running
            echo $retval
        fi
        ;;

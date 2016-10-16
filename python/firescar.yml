@@ -4,7 +4,7 @@
 #run_id: fzhang_2016-05-08T13-48-12
 
 base_dir:  /home/547/fxz547/myGithub/geodanalytics/workdir 
-prod_type:   'ls8_nbar_albers'
+prod_type:   'ls7_nbar_albers'
 
 # AOI area of interest 
 aoi_name:   'FireScarNT'

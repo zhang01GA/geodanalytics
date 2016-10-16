@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# how2run: ./git_pull_all.sh .
 # how2run: ./git_pull_all.sh /path2/gitrepos
+
 if [ $# -lt 1 ]; then
 echo Usage: $0  /path2_gitrepos
 exit 1
