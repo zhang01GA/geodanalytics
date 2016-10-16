@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# @vdi-n8 myGithub]$ ./git_pull_all.sh  $PWD    ($PWD for current dir, not .)
 # how2run: ./git_pull_all.sh /path2/gitrepos
 
 if [ $# -lt 1 ]; then
