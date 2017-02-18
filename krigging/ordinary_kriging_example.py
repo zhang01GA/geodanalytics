@@ -31,3 +31,5 @@ z, ss = OK.execute('grid', gridx, gridy)
 
 # Writes the kriged grid to an ASCII grid file.
 kt.write_asc_grid(gridx, gridy, z, filename="output.asc")
+
+plt.imshow(z)
