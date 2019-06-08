@@ -24,7 +24,6 @@ rcParams['axes.formatter.useoffset'] = False  # disable scalar formatter / offse
 from sklearn import tree
 from IPython.display import Image 
 from sklearn.externals.six import StringIO  
-import pydot 
 
     
 def get_pdf_from_csv( my_file_csv ):
@@ -66,8 +65,8 @@ def get_sample_target(pdf):
     X= pdf[[clm_list[7],clm_list[10],clm_list[12]] ].values
     Y = pdf[clm_list[1]].values
 
-    print X.shape, type(X)
-    print Y.shape
+    print (X.shape, type(X))
+    print (Y.shape)
     
     return (X, Y)
     
@@ -102,7 +101,7 @@ def check_model(clf, X, Y):
         p_Y=clf.predict(X[isample,:].reshape(1, -1) )
         if p_Y[0] != Y[isample]:
             print ("Wrong!!!  quick check at sample=", isample, p_Y, Y[isample])
-            print  X[isample,:]  # should keepi X_orig Y_orig to see what it is
+            print (X[isample,:])  # should keepi X_orig Y_orig to see what it is
         else:
             pass
             #print("Correct Predict")
